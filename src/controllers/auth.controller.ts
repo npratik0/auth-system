@@ -280,7 +280,11 @@ export const logout = async (req: any, res: any) => {
   try{
     const userId = req.user.userId;
 
-    await User.update({refreshAccessToken:null}, {where: {id: userId}});
+    await User.update({refreshToken:null}, {where: {id: userId}});
+
+    res.status(200).json({
+      message: "Logout Sucessfull"
+    })
 
   }catch(error){
     return res.status(500).json({
