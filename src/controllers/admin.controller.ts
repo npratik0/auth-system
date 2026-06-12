@@ -56,8 +56,15 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserRole = async (req: any, res: any) => {
+export const updateUserRole = async (req: Request<{id:string},{role:string}>, res: Response) => {
   try {
+
+    if(!req.auth){
+      return res.status(401).json({
+        message: "Unauthorized"
+      })
+    }
+
     const { id } = req.params;
     const { role } = req.body;
 
@@ -70,7 +77,7 @@ export const updateUserRole = async (req: any, res: any) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (user.role === 'superadmin' && req.user.role !== 'superadmin') {
+    if (user.role === 'superadmin' && req.auth.role !== 'superadmin') {
       return res.status(403).json({ message: 'Cannot modify a superadmin' });
     }
 
@@ -85,7 +92,7 @@ export const updateUserRole = async (req: any, res: any) => {
   }
 };
 
-export const deleteUser = async (req: any, res: any) => {
+export const deleteUser = async (req: Request<{id: string}>, res: Response) => {
   try {
     const { id } = req.params;
 

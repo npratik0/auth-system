@@ -158,9 +158,13 @@ export const login = async (req:Request, res:Response) => {
     }
 }
 
-export const getProfile = async (req: any, res: any) => {
+export const getProfile = async (req: Request, res: Response) => {
     try {
-        const id = req.user.userId;
+        if(!req.auth) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        const id = req.auth.userId;
 
         const user = await User.findByPk(id, {
         attributes: {
@@ -509,15 +513,16 @@ export const logout = async (req: Request, res: Response) => {
   }
 }
 
-export const logoutAll = async (req: any, res: any) => {
+export const logoutAll = async (req: Request, res: Response) => {
   try{
-    // if(!req.user){
-    //   return res.status(401).json({
-    //     message: "Unauthorized"
-    //   })
-    // }
+    console.log(req.body);
+    if(!req.auth){
+      return res.status(401).json({
+        message: "Unauthorized"
+      })
+    }
 
-    const userId = req.user.userId;
+    const userId = req.auth.userId;
 
     await Session.destroy({where: {userId}});
 

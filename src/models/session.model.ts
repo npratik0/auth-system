@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/db";
 
 export class Session extends Model {
-  public id!: string;        // uuid
+  public id!: string;        
   public userId!: number;
   public refreshToken!: string;
   public ip!: string;

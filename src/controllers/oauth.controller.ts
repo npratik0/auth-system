@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { Session } from "../models/session.model";
 import { generateToken, generateRefreshToken } from "../utils/jwt";
+import { User } from "../models/user.model";
 
-export const googleCallback = async (req: any, res: any) => {
+export const googleCallback = async (req: Request, res: Response) => {
   try {
-    const user = req.user;
+    const user = req.user as User;
 
     if (!user) {
       return res.redirect(

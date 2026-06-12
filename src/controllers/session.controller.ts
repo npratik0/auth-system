@@ -1,8 +1,15 @@
 import { Session } from "../models/session.model";
+import { Request, Response } from "express";
 
-export const getSessions = async (req: any, res: any) => {
+export const getSessions = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userId;
+    if(!req.auth){
+      return res.status(401).json({
+        message: "Unauthorized"
+      })
+    }
+
+    const userId = req.auth.userId;
 
     const sessions = await Session.findAll({
       where: { userId },
@@ -15,9 +22,15 @@ export const getSessions = async (req: any, res: any) => {
   }
 };
 
-export const revokeSession = async (req: any, res: any) => {
+export const revokeSession = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userId;
+    if(!req.auth){
+      return res.status(401).json({
+        message: "Unauthorized"
+      })
+    }
+
+    const userId = req.auth.userId;
     const { sessionId } = req.params;
 
     const session = await Session.findOne({
