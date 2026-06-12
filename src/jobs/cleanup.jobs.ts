@@ -5,7 +5,6 @@ import { Otp } from "../models/otp.models";
 
 export const startCleanupJob = () => {
 
-  // clean expired OTPs every 10 minutes
   cron.schedule("*/10 * * * *", async () => {
     try {
       const deleted = await Otp.destroy({
@@ -17,7 +16,6 @@ export const startCleanupJob = () => {
     }
   });
 
-  // clean expired sessions every hour
   cron.schedule("0 * * * *", async () => {
     try {
       const deleted = await Session.destroy({

@@ -13,7 +13,6 @@ export const googleCallback = async (req: any, res: any) => {
       );
     }
 
-    // generate tokens
     const accessToken = generateToken(user.id, user.role);
     const refreshToken = generateRefreshToken(user.id, user.role);
 

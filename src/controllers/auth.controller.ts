@@ -12,16 +12,16 @@ export const register = async (req:Request, res:Response) => {
     try{
         const {fullName, email, phoneNumber, password, confirmPassword} = req.body;
 
-        if(!fullName || !email || !phoneNumber || !password || !confirmPassword){
-            return res.status(400).json({
-                message: "All fields required"
-            })
-        }
-        if(password != confirmPassword){
-            return res.status(400).json({
-                message: "Passwords don't match",
-            })
-        }
+        // if(!fullName || !email || !phoneNumber || !password || !confirmPassword){
+        //     return res.status(400).json({
+        //         message: "All fields required"
+        //     })
+        // }
+        // if(password != confirmPassword){
+        //     return res.status(400).json({
+        //         message: "Passwords don't match",
+        //     })
+        // }
 
         const existingUser = await User.findOne({
             where: {
@@ -30,10 +30,23 @@ export const register = async (req:Request, res:Response) => {
         })
 
         if(existingUser){
-            return res.status(400).json({
+            return res.status(409).json({
                 message: "Email already exists"
             })
         }
+
+        const existingPhone = await User.findOne({
+          where:{
+            phoneNumber
+          }
+        })
+
+        if(existingPhone){
+          return res.status(409).json({
+            message: "Phone Number already exists"
+          })
+        }
+        
 
         const hashedPassword = await hashPassword(password);
 
@@ -230,7 +243,7 @@ const createAndSendOtp = async (email: string): Promise<void> => {
 //   }
 // };
 
-export const forgotPassword = async (req: any, res: any) => {
+export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -247,7 +260,7 @@ export const forgotPassword = async (req: any, res: any) => {
   }
 };
 
-export const resendOtp = async (req: any, res: any) => {
+export const resendOtp = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -323,7 +336,7 @@ export const resendOtp = async (req: any, res: any) => {
 //   }
 // };
 
-export const resetPassword = async (req: any, res: any) => {
+export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { email, otp, newPassword } = req.body;
 
@@ -393,7 +406,9 @@ export const resetPassword = async (req: any, res: any) => {
 //   }
 // };
 
-// Refressh Token with Token Rotation and Session Management
+
+
+
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
     const sessionId = req.cookies.sessionId;
@@ -403,7 +418,6 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "No session found" });
     }
 
-    // find session in DB
     const session = await Session.findOne({
       where: { id: sessionId, refreshToken },
     });
@@ -414,7 +428,6 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Invalid session. Please login again" });
     }
 
-    // session expired
     if (new Date() > session.expiresAt) {
       await session.destroy();
       res.clearCookie("sessionId");
@@ -422,7 +435,6 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Session expired. Please login again" });
     }
 
-    // verify refresh token
     let decoded: any;
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
@@ -438,16 +450,13 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // delete old session
     await session.destroy();
 
-    // generate new tokens
     const newAccessToken = generateToken(user.id, user.role);
     const newRefreshToken = generateRefreshToken(user.id, user.role);
     const newSessionId = uuidv4();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    // create new session
     await Session.create({
       id: newSessionId,
       userId: user.id,
@@ -457,7 +466,6 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       expiresAt,
     });
 
-    // set new cookies
     res.cookie("sessionId", newSessionId, {
       httpOnly: true,
       secure: false,
@@ -479,7 +487,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
 };
 
 
-export const logout = async (req: any, res: any) => {
+export const logout = async (req: Request, res: Response) => {
   try{
     const sessionId = req.cookies.sessionId;
 
@@ -503,6 +511,12 @@ export const logout = async (req: any, res: any) => {
 
 export const logoutAll = async (req: any, res: any) => {
   try{
+    // if(!req.user){
+    //   return res.status(401).json({
+    //     message: "Unauthorized"
+    //   })
+    // }
+
     const userId = req.user.userId;
 
     await Session.destroy({where: {userId}});

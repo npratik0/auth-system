@@ -3,13 +3,15 @@ import { forgotPassword, login, logout, refreshAccessToken, register, resendOtp,
 import { authenticate } from "../middlewares/auth.middleware";
 import { googleCallback } from "../controllers/oauth.controller";
 import passport from "../config/passport";
+import { forgotPasswordSchema, LoginSchema, registerSchema, resetPasswordSchema } from "../validators/auth.validator";
+import { validate } from "../middlewares/validate.middleware";
 
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/forget-password", forgotPassword);
-router.post("/reset-password",resetPassword);
+router.post("/register", validate(registerSchema), register);
+router.post("/login",validate(LoginSchema), login);
+router.post("/forget-password",validate(forgotPasswordSchema), forgotPassword);
+router.post("/reset-password",validate(resetPasswordSchema),resetPassword);
 router.post("/resend-otp",resendOtp);
 router.post("/refresh-token",refreshAccessToken);
 router.post("/logout",authenticate,logout);

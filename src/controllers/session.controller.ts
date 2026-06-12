@@ -1,6 +1,5 @@
 import { Session } from "../models/session.model";
 
-// get all active sessions for current user
 export const getSessions = async (req: any, res: any) => {
   try {
     const userId = req.user.userId;
@@ -16,7 +15,6 @@ export const getSessions = async (req: any, res: any) => {
   }
 };
 
-// revoke a specific session
 export const revokeSession = async (req: any, res: any) => {
   try {
     const userId = req.user.userId;
